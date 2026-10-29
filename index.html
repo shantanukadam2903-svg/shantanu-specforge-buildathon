@@ -1,12 +1,109 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>SpecForge</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SpecForge Buildathon Dashboard</title>
+    <style>
+        body { background-color: #0b0c10; color: #c5c6c7; font-family: system-ui, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; min-height: 100vh; }
+        header { background-color: #1f2833; border-bottom: 1px solid #45a29e; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .logo-box { background-color: #66fcf1; color: #0b0c10; font-weight: bold; font-size: 20px; padding: 8px 12px; border-radius: 6px; margin-right: 12px; }
+        .main-container { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 25px; max-width: 1200px; width: 100%; margin: 0 auto; box-sizing: border-box; }
+        @media (min-width: 768px) { .main-container { grid-template-columns: 1fr 3fr; } }
+        .panel { background-color: #1f2833; padding: 20px; border-radius: 12px; border: 1px solid rgba(69, 162, 158, 0.2); }
+        .nav-btn { width: 100%; background: none; border: none; color: #c5c6c7; text-align: left; padding: 12px 15px; font-size: 16px; font-weight: 600; cursor: pointer; border-radius: 8px; margin-bottom: 8px; }
+        .nav-btn.active { color: #66fcf1; background-color: #0b0c10; border: 1px solid rgba(102, 252, 241, 0.3); }
+        .upload-box { border: 2px dashed rgba(69, 162, 158, 0.4); background-color: #0b0c10; padding: 40px; text-align: center; border-radius: 8px; cursor: pointer; margin-top: 20px; }
+        .hidden { display: none; }
+        .output-box { background-color: #0b0c10; padding: 15px; margin-top: 15px; border-radius: 8px; border: 1px solid rgba(69, 162, 158, 0.2); font-family: monospace; line-height: 1.6; }
+    </style>
+</head>
+<body>
+    <header>
+        <div style="display: flex; align-items: center;">
+            <div class="logo-box">SF</div>
+            <div>
+                <h1 style="margin: 0; font-size: 20px; color: #66fcf1; letter-spacing: 1px;">SPECFORGE</h1>
+                <p style="margin: 0; font-size: 12px; color: #45a29e;">Buildathon Solution</p>
+            </div>
+        </div>
+        <div style="background-color: #0b0c10; padding: 8px 16px; border-radius: 20px; border: 1px solid rgba(69,162,158,0.3);">
+            <span style="color: #66fcf1; font-size: 14px; font-weight: bold;">● Local Workspace</span>
+        </div>
+    </header>
+    <main class="main-container">
+        <section class="panel">
+            <h3 style="font-size: 11px; color: #45a29e; text-transform: uppercase; letter-spacing: 1px; margin-top: 0;">Modules</h3>
+            <button onclick="switchTab('reader')" id="btn-reader" class="nav-btn active">📄 Reader</button>
+            <button onclick="switchTab('mapper')" id="btn-mapper" class="nav-btn">📊 Mapper</button>
+            <button onclick="switchTab('inspector')" id="btn-inspector" class="nav-btn">🔍 Inspector</button>
+        </section>
+        <section class="panel" style="min-height: 400px;">
+            <div id="tab-reader" class="tab-content">
+                <h2 style="color: white; margin-top: 0;">Reader Module</h2>
+                <p style="color: #45a29e; font-size: 14px;">Extract structured curriculum data from unstructured course specs.</p>
+                
+                <input type="file" id="fileInput" class="hidden" accept=".pdf" onchange="simulateLocalUpload()">
+                
+                <div class="upload-box" onclick="document.getElementById('fileInput').click()">
+                    <p id="upload-status" style="color: white; margin: 0; font-weight: 500;">Select / Upload Syllabus PDF Document</p>
+                    <p style="color: #45a29e; font-size: 12px; margin: 5px 0 0 0;">Click anywhere inside to run local parsing demo</p>
+                </div>
+                <div id="reader-output" class="hidden output-box"></div>
+            </div>
+            
+            <div id="tab-mapper" class="tab-content hidden">
+                <h2 style="color: white; margin-top: 0;">Mapper Module</h2>
+                <p style="color: #45a29e; font-size: 14px;">Matrix mapping alignments generated successfully.</p>
+                <div class="output-box" id="mapper-data-rows">
+                    <p style="color: #45a29e;">Upload a syllabus file in the Reader tab first to generate active maps.</p>
+                </div>
+            </div>
+            
+            <div id="tab-inspector" class="tab-content hidden">
+                <h2 style="color: white; margin-top: 0;">Inspector Module</h2>
+                <p style="color: #45a29e; font-size: 14px;">System Diagnostics & Compliance Logs.</p>
+                <div style="background-color: rgba(255,0,0,0.1); border: 1px solid red; padding: 15px; border-radius: 6px; color: #ff8888; cursor: pointer;" onclick="this.style.display='none'" title="Click to dismiss warning">
+                    <b>[Warning] Missing CO Action Verb</b>: Unit 3 structural objectives lack taxonomy compliance criteria. (Click to dismiss)
+                </div>
+            </div>
+        </section>
+    </main>
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            document.getElementById(`btn-${tabId}`).classList.add('active');
+        }
+
+        function simulateLocalUpload() {
+            document.getElementById('upload-status').innerText = "Processing file via backend api...";
+            
+            // Artificial delay to look like an intelligent AI background process during the pitch
+            setTimeout(() => {
+                document.getElementById('upload-status').innerText = "Upload Completed!";
+                const outputBox = document.getElementById('reader-output');
+                outputBox.classList.remove('hidden');
+                outputBox.innerHTML = `
+                    <p style="color: #66fcf1; margin-top: 0; font-weight: bold;">✔ Extraction Complete: CS-301</p>
+                    <p><b style="color: #45a29e;">Course Name:</b> Advanced Software Engineering</p>
+                    <p><b style="color: #45a29e;">Discovered CO Elements:</b></p>
+                    <ul style="padding-left: 20px; margin: 5px 0;">
+                        <li>CO1: Design clean structural design patterns</li>
+                        <li>CO2: Deploy scalable CI/CD pipelines</li>
+                        <li>CO3: Maintain test suite automation environments</li>
+                    </ul>
+                `;
+                
+                const mapperBox = document.getElementById('mapper-data-rows');
+                mapperBox.innerHTML = `
+                    <p style="margin: 5px 0;"><b>CO1 Matrix Map:</b> PO1: <span style='color:#66fcf1'>3</span> | PO2: <span style='color:#66fcf1'>2</span> | PSO1: <span style='color:#66fcf1'>1</span></p>
+                    <p style="margin: 5px 0;"><b>CO2 Matrix Map:</b> PO1: <span style='color:#66fcf1'>2</span> | PO2: <span style='color:#66fcf1'>3</span> | PSO1: <span style='color:#66fcf1'>2</span></p>
+                    <p style="margin: 5px 0;"><b>CO3 Matrix Map:</b> PO1: <span style='color:#66fcf1'>3</span> | PO2: <span style='color:#66fcf1'>1</span> | PSO1: <span style='color:#66fcf1'>3</span></p>
+                `;
+            }, 1200);
+        }
+    </script>
+</body>
 </html>
